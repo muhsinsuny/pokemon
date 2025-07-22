@@ -37,19 +37,36 @@ export const fetchPokemonList = async (
   );
 
   const detailed = await Promise.all(
-    res.data.results.map(async (pokemon: Pokemon) => {
+    res.data.results.map(async (pokemon: { name: string; url: string }) => {
       const detail = await axios.get(pokemon.url);
       const types = detail.data.types
-        .map((t: { type: { name: string } }) => t.type.name)
+        .map((t: { slot: number; type: { name: string; url: string } }) => ({
+          slot: t.slot,
+          type: {
+            name: t.type.name,
+            url: t.type.url,
+          },
+        }))
         .slice(0, 3);
 
-      return {
+      const result = {
         name: pokemon.name,
         url: pokemon.url,
         id: detail.data.id,
         image: detail.data.sprites.other['official-artwork'].front_default,
         types: types,
       };
+
+      console.log('nama pokemon dan typenya:', result.name, result.types);
+
+      console.log('detailnya:', {
+        name: pokemon.name,
+        url: pokemon.url,
+        id: detail.data.id,
+        image: detail.data.sprites.other['official-artwork'].front_default,
+        types,
+      });
+      return result;
     })
   );
 
